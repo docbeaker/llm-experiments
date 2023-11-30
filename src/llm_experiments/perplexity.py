@@ -21,7 +21,8 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 class PerplexityCalculator:
     def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, context_size: int = None):
-        self.model = model
+        self.device = 'cuda' if cuda_is_available() else 'cpu'
+        self.model = model.to(self.device)
         self.tok = tokenizer
         if context_size:
             self.context_size = context_size
@@ -29,7 +30,6 @@ class PerplexityCalculator:
             self.context_size = self.model.config.n_positions
         else:
             raise ValueError("cannot determine context size from config, please specify")
-        self.device = 'cuda' if cuda_is_available() else 'cpu'
 
     def compute_token_probabilities(self, text: str, stride: int = 256) -> Tensor:
         """
